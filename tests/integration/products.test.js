@@ -17,6 +17,7 @@ describe('Products API Integration Tests', () => {
   beforeEach(async () => {
     const client = await pool.connect();
     try {
+      await client.query('BEGIN');
       await client.query('DELETE FROM order_items');
       await client.query('DELETE FROM reviews');
       await client.query('DELETE FROM orders');
@@ -32,7 +33,9 @@ describe('Products API Integration Tests', () => {
         [uniqueCategoryName]
       );
       categoryId = categoryResult.rows[0].id;
+      await client.query('COMMIT');
     } catch (error) {
+      await client.query('ROLLBACK');
       console.error('Setup error:', error);
       throw error;
     } finally {
@@ -42,18 +45,26 @@ describe('Products API Integration Tests', () => {
 
   describe('POST /api/products', () => {
     it('should create a new product', async () => {
-      const productData = {
-        name: 'Test Product',
-        description: 'Test Description',
-        price: 100.50,
-        stock: 10,
-        category_id: categoryId,
-      };
+      // beforeEach'te oluşturulan categoryId'yi kullan
+      if (!categoryId) {
+        throw new Error('categoryId tanımlı değil');
+      }
 
       const response = await request(app)
         .post('/api/products')
-        .send(productData)
-        .expect(201);
+        .send({
+          name: 'Test Product',
+          description: 'Test Description',
+          price: 100.50,
+          stock: 10,
+          category_id: categoryId,
+        });
+      
+      if (response.status !== 201) {
+        console.log('Product creation failed:', JSON.stringify(response.body, null, 2));
+        console.log('categoryId:', categoryId);
+      }
+      expect(response.status).toBe(201);
 
       expect(response.body).toHaveProperty('id');
       expect(response.body.name).toBe(productData.name);

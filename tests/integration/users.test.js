@@ -15,9 +15,17 @@ describe('Users API Integration Tests', () => {
   beforeEach(async () => {
     const client = await pool.connect();
     try {
+      await client.query('BEGIN');
+      await client.query('DELETE FROM order_items');
+      await client.query('DELETE FROM reviews');
+      await client.query('DELETE FROM orders');
+      await client.query('DELETE FROM products');
+      await client.query('DELETE FROM categories');
       await client.query('DELETE FROM users');
       await client.query('ALTER SEQUENCE users_id_seq RESTART WITH 1');
+      await client.query('COMMIT');
     } catch (error) {
+      await client.query('ROLLBACK');
       console.error('Cleanup error:', error);
     } finally {
       client.release();
@@ -81,6 +89,11 @@ describe('Users API Integration Tests', () => {
           email: uniqueEmail,
           password: 'password123',
         });
+      
+      if (createResponse.status !== 201) {
+        console.log('User creation failed:', createResponse.body);
+      }
+      expect(createResponse.status).toBe(201);
 
       const userId = createResponse.body.id;
 
@@ -89,6 +102,7 @@ describe('Users API Integration Tests', () => {
         .send({ name: 'Updated Name' })
         .expect(200);
 
+      expect(response.body).toHaveProperty('name');
       expect(response.body.name).toBe('Updated Name');
     });
   });

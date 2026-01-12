@@ -19,6 +19,7 @@ describe('Orders API Integration Tests', () => {
   beforeEach(async () => {
     const client = await pool.connect();
     try {
+      await client.query('BEGIN');
       await client.query('DELETE FROM order_items');
       await client.query('DELETE FROM orders');
       await client.query('DELETE FROM products');
@@ -52,7 +53,9 @@ describe('Orders API Integration Tests', () => {
         [categoryId]
       );
       productId = productResult.rows[0].id;
+      await client.query('COMMIT');
     } catch (error) {
+      await client.query('ROLLBACK');
       console.error('Setup error:', error);
       throw error;
     } finally {
@@ -62,6 +65,10 @@ describe('Orders API Integration Tests', () => {
 
   describe('POST /api/orders', () => {
     it('should create a new order with items', async () => {
+      if (!userId || !productId) {
+        throw new Error('userId veya productId tanımlı değil');
+      }
+      
       const orderData = {
         user_id: userId,
         items: [
@@ -72,8 +79,13 @@ describe('Orders API Integration Tests', () => {
 
       const response = await request(app)
         .post('/api/orders')
-        .send(orderData)
-        .expect(201);
+        .send(orderData);
+      
+      if (response.status !== 201) {
+        console.log('Order creation failed:', JSON.stringify(response.body, null, 2));
+        console.log('userId:', userId, 'productId:', productId);
+      }
+      expect(response.status).toBe(201);
 
       expect(response.body).toHaveProperty('id');
       expect(response.body).toHaveProperty('items');
@@ -85,15 +97,21 @@ describe('Orders API Integration Tests', () => {
   describe('GET /api/orders/:id', () => {
     it('should return order by id with items', async () => {
       const orderData = {
-        user_id: userId,
+        user_id: parseInt(userId),
         items: [
-          { product_id: productId, quantity: 1 },
+          { product_id: parseInt(productId), quantity: 1 },
         ],
+        shipping_address: 'Test Address',
       };
 
       const createResponse = await request(app)
         .post('/api/orders')
         .send(orderData);
+      
+      if (createResponse.status !== 201) {
+        console.log('Order creation failed in GET test:', createResponse.body);
+      }
+      expect(createResponse.status).toBe(201);
 
       const orderId = createResponse.body.id;
 

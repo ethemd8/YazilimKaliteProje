@@ -15,6 +15,7 @@ describe('E2E: E-Commerce Flow Tests', () => {
   beforeEach(async () => {
     const client = await pool.connect();
     try {
+      await client.query('BEGIN');
       // Foreign key constraint'leri nedeniyle sıralı silme
       await client.query('DELETE FROM order_items');
       await client.query('DELETE FROM reviews');
@@ -28,7 +29,9 @@ describe('E2E: E-Commerce Flow Tests', () => {
       await client.query('ALTER SEQUENCE orders_id_seq RESTART WITH 1');
       await client.query('ALTER SEQUENCE order_items_id_seq RESTART WITH 1');
       await client.query('ALTER SEQUENCE reviews_id_seq RESTART WITH 1');
+      await client.query('COMMIT');
     } catch (error) {
+      await client.query('ROLLBACK');
       console.error('Cleanup error:', error);
     } finally {
       client.release();

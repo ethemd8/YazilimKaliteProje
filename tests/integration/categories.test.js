@@ -15,11 +15,17 @@ describe('Categories API Integration Tests', () => {
   beforeEach(async () => {
     const client = await pool.connect();
     try {
+      await client.query('BEGIN');
+      await client.query('DELETE FROM order_items');
+      await client.query('DELETE FROM reviews');
+      await client.query('DELETE FROM orders');
       await client.query('DELETE FROM products');
       await client.query('DELETE FROM categories');
       await client.query('ALTER SEQUENCE categories_id_seq RESTART WITH 1');
       await client.query('ALTER SEQUENCE products_id_seq RESTART WITH 1');
+      await client.query('COMMIT');
     } catch (error) {
+      await client.query('ROLLBACK');
       console.error('Cleanup error:', error);
     } finally {
       client.release();

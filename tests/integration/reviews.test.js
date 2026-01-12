@@ -19,6 +19,7 @@ describe('Reviews API Integration Tests', () => {
   beforeEach(async () => {
     const client = await pool.connect();
     try {
+      await client.query('BEGIN');
       await client.query('DELETE FROM reviews');
       await client.query('DELETE FROM products');
       await client.query('DELETE FROM categories');
@@ -50,7 +51,9 @@ describe('Reviews API Integration Tests', () => {
         [categoryId]
       );
       productId = productResult.rows[0].id;
+      await client.query('COMMIT');
     } catch (error) {
+      await client.query('ROLLBACK');
       console.error('Setup error:', error);
       throw error;
     } finally {
@@ -60,17 +63,26 @@ describe('Reviews API Integration Tests', () => {
 
   describe('POST /api/reviews', () => {
     it('should create a new review', async () => {
-      const reviewData = {
-        user_id: userId,
-        product_id: productId,
-        rating: 5,
-        comment: 'Great product!',
-      };
+      // beforeEach'te oluşturulan userId ve productId'yi kullan
+      // Ama önce var olduklarından emin ol
+      if (!userId || !productId) {
+        throw new Error('userId veya productId tanımlı değil');
+      }
 
       const response = await request(app)
         .post('/api/reviews')
-        .send(reviewData)
-        .expect(201);
+        .send({
+          user_id: userId,
+          product_id: productId,
+          rating: 5,
+          comment: 'Great product!',
+        });
+      
+      if (response.status !== 201) {
+        console.log('Review creation failed:', JSON.stringify(response.body, null, 2));
+        console.log('userId:', userId, 'productId:', productId);
+      }
+      expect(response.status).toBe(201);
 
       expect(response.body).toHaveProperty('id');
       expect(response.body.rating).toBe(reviewData.rating);
