@@ -1,0 +1,68 @@
+{
+    "name": "yazilim-kalite-proje3",
+    "version": "1.0.0",
+    "description": "E-ticaret REST API - Yazılım Kalite Güvencesi ve Test Projesi",
+    "main": "src/app.js",
+    "scripts": {
+        "start": "node src/app.js",
+        "dev": "nodemon src/app.js",
+        "test": "jest --coverage",
+        "test:unit": "jest tests/unit --coverage",
+        "test:integration": "jest tests/integration --coverage",
+        "test:e2e": "jest tests/e2e --coverage",
+        "test:watch": "jest --watch",
+        "migrate": "node src/database/migrate.js",
+        "seed": "node src/database/seed.js"
+    },
+    "keywords": [
+        "rest-api",
+        "e-commerce",
+        "testing",
+        "postgresql"
+    ],
+    "author": "",
+    "license": "ISC",
+    "dependencies": {
+        "express": "^4.18.2",
+        "pg": "^8.11.3",
+        "dotenv": "^16.3.1",
+        "cors": "^2.8.5",
+        "swagger-ui-express": "^5.0.0",
+        "swagger-jsdoc": "^6.2.8",
+        "express-validator": "^7.0.1"
+    },
+    "devDependencies": {
+        "jest": "^29.7.0",
+        "supertest": "^6.3.3",
+        "nodemon": "^3.0.2",
+        "@types/jest": "^29.5.11"
+    },
+    "jest": {
+        "testEnvironment": "node",
+        "setupFilesAfterEnv": [
+            "<rootDir>/tests/setup.js"
+        ],
+        "coverageThreshold": {
+            "global": {
+                "branches": 45,
+                "functions": 60,
+                "lines": 60,
+                "statements": 60
+            }
+        },
+        "collectCoverageFrom": [
+            "src/**/*.js",
+            "!src/database/migrate.js",
+            "!src/database/seed.js",
+            "!src/app.js",
+            "!src/utils/validators.js"
+        ],
+        "coveragePathIgnorePatterns": [
+            "/node_modules/",
+            "/tests/"
+        ],
+        "testMatch": [
+            "**/tests/**/*.test.js"
+        ]
+    }
+}

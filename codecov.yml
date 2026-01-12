@@ -1,0 +1,27 @@
+codecov:
+  token: # Codecov token'ınızı buraya ekleyin (opsiyonel)
+  bot: false
+  ci:
+    - github-actions
+  notify:
+    require_ci_to_pass: yes
+
+coverage:
+  precision: 2
+  round: down
+  range: "70...100"
+  
+  status:
+    project:
+      default:
+        target: 70%
+        threshold: 1%
+    patch:
+      default:
+        target: 70%
+
+ignore:
+  - "tests/"
+  - "src/database/migrate.js"
+  - "src/database/seed.js"
+  - "src/app.js"
