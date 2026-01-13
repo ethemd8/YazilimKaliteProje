@@ -4,7 +4,7 @@ Yazılım Kalite Güvencesi ve Test Projesi - E-Ticaret REST API
 
 ## 📋 Proje Açıklaması
 
-Bu proje, Node.js ve PostgreSQL kullanılarak geliştirilmiş bir e-ticaret REST API'sidir. Proje, kapsamlı test kapsamı (%70+ code coverage), Swagger/OpenAPI dokümantasyonu ve CI/CD pipeline içermektedir.
+Bu proje, Node.js ve PostgreSQL kullanılarak geliştirilmiş bir e-ticaret REST API'sidir. Proje, kapsamlı test kapsamı (%60+ code coverage), Swagger/OpenAPI dokümantasyonu ve CI/CD pipeline içermektedir.
 
 ## 🚀 Kullanılan Teknolojiler
 
@@ -165,13 +165,31 @@ npm run test:watch
 
 ### Test Kapsamı
 
-- **Birim Testler**: 13 test dosyası, 93 test case
-  - Model metodları (User, Product)
-  - Service katmanı (tüm servisler)
-  - Controller katmanı (tüm controller'lar)
-  - Validator fonksiyonları
+- **Birim Testler**: 13 test dosyası, ~102 test case
+  - **Controllers** (5 dosya, 58 test):
+    - `userController.test.js`: 10 test
+    - `productController.test.js`: 12 test
+    - `orderController.test.js`: 14 test
+    - `categoryController.test.js`: 10 test
+    - `reviewController.test.js`: 12 test
+  - **Services** (5 dosya, 34 test):
+    - `userService.test.js`: 6 test
+    - `productService.test.js`: 9 test
+    - `orderService.test.js`: 7 test
+    - `categoryService.test.js`: 9 test
+    - `reviewService.test.js`: 3 test
+  - **Models** (2 dosya, 8 test):
+    - `User.test.js`: 4 test
+    - `Product.test.js`: 4 test
+  - **Utils** (1 dosya, 2 test):
+    - `validators.test.js`: 2 test
 
 - **Entegrasyon Testleri**: 5 test dosyası, 10 test case
+  - `users.test.js`: 3 test (POST, GET by ID, PATCH)
+  - `products.test.js`: 2 test (POST, GET by ID)
+  - `orders.test.js`: 2 test (POST, GET by ID with items)
+  - `reviews.test.js`: 1 test (POST)
+  - `categories.test.js`: 2 test (POST, GET all)
   - API endpoint'leri (GET, POST, PATCH, DELETE)
   - Veritabanı işlemleri
   - İlişkili kaynaklar arası işlemler
@@ -184,17 +202,25 @@ npm run test:watch
   - Çoklu ürünlü sipariş senaryosu
   - Hata yönetimi senaryoları
 
-**Toplam**: 19 test dosyası, 116 test case
+**Toplam**: 19 test dosyası, ~117 test case
+
+### Test İzolasyonu
+
+Tüm entegrasyon ve E2E testleri, her test öncesinde veritabanı transaction'ları (`BEGIN`, `COMMIT`, `ROLLBACK`) kullanarak izole edilmiştir. Bu sayede:
+- Testler birbirini etkilemez
+- Her test temiz bir veritabanı durumuyla başlar
+- Test verileri otomatik olarak temizlenir
+- Test sırası önemli değildir
 
 ### Code Coverage
 
 Proje **%60+ code coverage** hedeflemektedir ve bu hedefi aşmıştır. Coverage raporu test çalıştırıldıktan sonra `coverage/` klasöründe oluşturulur.
 
 **Coverage Hedefleri:**
-- Statements: %60+ (Mevcut: ~80%)
-- Branches: %45+ (Mevcut: ~68%)
-- Functions: %60+ (Mevcut: ~75%)
-- Lines: %60+ (Mevcut: ~80%)
+- Statements: %60+ (Mevcut: **80.85%**)
+- Branches: %45+ (Mevcut: **67.89%**)
+- Functions: %60+ (Mevcut: **75.75%**)
+- Lines: %60+ (Mevcut: **81%**)
 
 Coverage raporunu görüntülemek için:
 ```bash
@@ -204,11 +230,19 @@ npm test
 
 ## 🔄 CI/CD
 
-Proje GitHub Actions ile CI/CD pipeline'ı içermektedir:
+Proje GitHub Actions ile CI/CD pipeline'ı içermektedir. Pipeline 4 ayrı job'dan oluşur:
 
+1. **unit-tests**: Birim testlerini çalıştırır (PostgreSQL gerektirmez)
+2. **integration-tests**: Entegrasyon testlerini çalıştırır (PostgreSQL servisi ile)
+3. **e2e-tests**: E2E testlerini çalıştırır (PostgreSQL servisi ile)
+4. **coverage**: Tüm testleri coverage ile çalıştırır ve Codecov'a yükler
+
+**Özellikler:**
 - Her push ve pull request'te otomatik test çalıştırma
 - Code coverage raporlama (Codecov entegrasyonu)
 - Test sonuçlarının action loglarında görüntülenmesi
+- Job'lar arası bağımlılık yönetimi (`needs` kullanımı)
+- Hata toleransı (`continue-on-error` ile)
 
 ### CI/CD Badge'leri
 
@@ -290,7 +324,7 @@ YazilimKaliteProje/
 │   ├── utils/           # Yardımcı fonksiyonlar
 │   └── app.js           # Ana uygulama dosyası
 ├── tests/
-│   ├── unit/            # Birim testler (13 dosya, 93 test)
+│   ├── unit/            # Birim testler (13 dosya, ~102 test)
 │   ├── integration/     # Entegrasyon testleri (5 dosya, 10 test)
 │   └── e2e/             # E2E testleri (1 dosya, 5 test)
 ├── .github/
