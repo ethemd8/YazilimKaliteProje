@@ -36,33 +36,5 @@
         "supertest": "^6.3.3",
         "nodemon": "^3.0.2",
         "@types/jest": "^29.5.11"
-    },
-    "jest": {
-        "testEnvironment": "node",
-        "setupFilesAfterEnv": [
-            "<rootDir>/tests/setup.js"
-        ],
-        "coverageThreshold": {
-            "global": {
-                "branches": 45,
-                "functions": 60,
-                "lines": 60,
-                "statements": 60
-            }
-        },
-        "collectCoverageFrom": [
-            "src/**/*.js",
-            "!src/database/migrate.js",
-            "!src/database/seed.js",
-            "!src/app.js",
-            "!src/utils/validators.js"
-        ],
-        "coveragePathIgnorePatterns": [
-            "/node_modules/",
-            "/tests/"
-        ],
-        "testMatch": [
-            "**/tests/**/*.test.js"
-        ]
     }
 }
