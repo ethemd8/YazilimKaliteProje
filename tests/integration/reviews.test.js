@@ -69,14 +69,16 @@ describe('Reviews API Integration Tests', () => {
         throw new Error('userId veya productId tanımlı değil');
       }
 
+      const reviewData = {
+        user_id: userId,
+        product_id: productId,
+        rating: 5,
+        comment: 'Great product!',
+      };
+
       const response = await request(app)
         .post('/api/reviews')
-        .send({
-          user_id: userId,
-          product_id: productId,
-          rating: 5,
-          comment: 'Great product!',
-        });
+        .send(reviewData);
       
       if (response.status !== 201) {
         console.log('Review creation failed:', JSON.stringify(response.body, null, 2));

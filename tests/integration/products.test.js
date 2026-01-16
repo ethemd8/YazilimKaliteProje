@@ -50,15 +50,17 @@ describe('Products API Integration Tests', () => {
         throw new Error('categoryId tanımlı değil');
       }
 
+      const productData = {
+        name: 'Test Product',
+        description: 'Test Description',
+        price: 100.5,
+        stock: 10,
+        category_id: categoryId,
+      };
+
       const response = await request(app)
         .post('/api/products')
-        .send({
-          name: 'Test Product',
-          description: 'Test Description',
-          price: 100.50,
-          stock: 10,
-          category_id: categoryId,
-        });
+        .send(productData);
       
       if (response.status !== 201) {
         console.log('Product creation failed:', JSON.stringify(response.body, null, 2));
